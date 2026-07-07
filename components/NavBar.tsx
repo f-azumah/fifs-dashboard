@@ -7,6 +7,7 @@ import ButterflyIcon from "@/components/ButterflyIcon";
 const links = [
   { href: "/", label: "Week" },
   { href: "/habits", label: "Habits" },
+  { href: "/quarter", label: "Quarter" },
 ];
 
 export default function NavBar() {

@@ -85,3 +85,34 @@ export function formatWeekRange(weekOf: Date): string {
 export function daysBetween(a: Date, b: Date): number {
   return Math.round((dateOnly(b).getTime() - dateOnly(a).getTime()) / DAY_MS);
 }
+
+export function quarterStart(date: Date): Date {
+  const d = dateOnly(date);
+  const q = Math.floor(d.getUTCMonth() / 3);
+  return new Date(Date.UTC(d.getUTCFullYear(), q * 3, 1));
+}
+
+export function quarterEnd(qStart: Date): Date {
+  return new Date(Date.UTC(qStart.getUTCFullYear(), qStart.getUTCMonth() + 3, 0));
+}
+
+export function shiftQuarter(qStart: Date, delta: number): Date {
+  return new Date(Date.UTC(qStart.getUTCFullYear(), qStart.getUTCMonth() + delta * 3, 1));
+}
+
+export function parseQuarterParam(param: string | undefined): Date {
+  if (param) {
+    const parsed = new Date(`${param}T00:00:00.000Z`);
+    if (!Number.isNaN(parsed.getTime())) return quarterStart(parsed);
+  }
+  return quarterStart(todayUTCDateOnly());
+}
+
+export function quarterParamFor(date: Date): string {
+  return weekParamFor(date);
+}
+
+export function quarterLabel(qStart: Date): string {
+  const q = Math.floor(qStart.getUTCMonth() / 3) + 1;
+  return `Q${q} ${qStart.getUTCFullYear()}`;
+}

@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { dateOnly, mondayOf } from "@/lib/dates";
+import { dateOnly, mondayOf, quarterStart } from "@/lib/dates";
 import { searchBooks } from "@/lib/openLibrary";
 import type {
   FailureMode,
+  GoalCategory,
   HabitCategory,
   HabitFrequency,
   ReadingStatus,
@@ -13,6 +14,7 @@ import type {
 
 const DASHBOARD_PATH = "/";
 const HABITS_PATH = "/habits";
+const QUARTER_PATH = "/quarter";
 
 // ---------- Tasks ----------
 
@@ -194,13 +196,31 @@ export async function setCurrentlyReadingBook(book: {
 }
 
 export async function setReadingStatus(status: ReadingStatus) {
-  await prisma.currentlyReading.upsert({
+  const reading = await prisma.currentlyReading.upsert({
     where: { id: "singleton" },
     create: { id: "singleton", status },
     update: { status },
   });
 
+  if (status === "COMPLETED" && reading.title) {
+    const today = dateOnly(new Date());
+    const alreadyLogged = await prisma.bookLog.findFirst({
+      where: { title: reading.title, completedAt: today },
+    });
+    if (!alreadyLogged) {
+      await prisma.bookLog.create({
+        data: {
+          title: reading.title,
+          author: reading.author,
+          coverUrl: reading.coverUrl,
+          completedAt: today,
+        },
+      });
+    }
+  }
+
   revalidatePath(DASHBOARD_PATH);
+  revalidatePath(QUARTER_PATH);
 }
 
 export async function searchBooksAction(query: string) {
@@ -270,4 +290,72 @@ export async function logHabitCompletionToday(habitId: string) {
   });
 
   revalidatePath(HABITS_PATH);
+}
+
+// ---------- Quarterly goals ----------
+
+export async function createQuarterlyGoal(formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return;
+
+  const quarterOfRaw = String(formData.get("quarterOf"));
+  const category = String(formData.get("category")) as GoalCategory;
+
+  await prisma.quarterlyGoal.create({
+    data: { title, category, quarterOf: quarterStart(new Date(quarterOfRaw)) },
+  });
+
+  revalidatePath(QUARTER_PATH);
+}
+
+export async function toggleQuarterlyGoal(goalId: string) {
+  const goal = await prisma.quarterlyGoal.findUnique({ where: { id: goalId } });
+  if (!goal) return;
+
+  await prisma.quarterlyGoal.update({
+    where: { id: goalId },
+    data: { done: !goal.done },
+  });
+
+  revalidatePath(QUARTER_PATH);
+}
+
+export async function deleteQuarterlyGoal(goalId: string) {
+  await prisma.quarterlyGoal.delete({ where: { id: goalId } });
+  revalidatePath(QUARTER_PATH);
+}
+
+// ---------- Quarterly wins ----------
+
+export async function createQuarterlyWin(formData: FormData) {
+  const text = String(formData.get("text") ?? "").trim();
+  if (!text) return;
+
+  const quarterOfRaw = String(formData.get("quarterOf"));
+
+  await prisma.quarterlyWin.create({
+    data: { text, quarterOf: quarterStart(new Date(quarterOfRaw)) },
+  });
+
+  revalidatePath(QUARTER_PATH);
+}
+
+export async function deleteQuarterlyWin(winId: string) {
+  await prisma.quarterlyWin.delete({ where: { id: winId } });
+  revalidatePath(QUARTER_PATH);
+}
+
+// ---------- Idea parking lot ----------
+
+export async function createIdea(formData: FormData) {
+  const text = String(formData.get("text") ?? "").trim();
+  if (!text) return;
+
+  await prisma.idea.create({ data: { text } });
+  revalidatePath(QUARTER_PATH);
+}
+
+export async function deleteIdea(ideaId: string) {
+  await prisma.idea.delete({ where: { id: ideaId } });
+  revalidatePath(QUARTER_PATH);
 }

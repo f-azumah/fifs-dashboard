@@ -40,6 +40,13 @@ enum ReadingStatus {
   COMPLETED
 }
 
+enum GoalCategory {
+  FINANCE
+  HEALTH
+  BUSINESS
+  PERSONAL
+}
+
 model Task {
   id          String     @id @default(cuid())
   title       String
@@ -129,4 +136,42 @@ model CurrentlyReading {
   coverUrl  String?
   status    ReadingStatus @default(READING)
   updatedAt DateTime      @updatedAt
+}
+
+model QuarterlyGoal {
+  id        String       @id @default(cuid())
+  quarterOf DateTime // first day of the quarter
+  category  GoalCategory
+  title     String
+  done      Boolean      @default(false)
+  position  Int          @default(0)
+  createdAt DateTime     @default(now())
+
+  @@index([quarterOf])
+}
+
+model QuarterlyWin {
+  id        String   @id @default(cuid())
+  quarterOf DateTime
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([quarterOf])
+}
+
+model Idea {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model BookLog {
+  id          String   @id @default(cuid())
+  title       String
+  author      String?
+  coverUrl    String?
+  completedAt DateTime // day the book was marked completed
+  createdAt   DateTime @default(now())
+
+  @@index([completedAt])
 }
