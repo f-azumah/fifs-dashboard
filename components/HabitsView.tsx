@@ -40,7 +40,7 @@ export default function HabitsView({
         <div className="flex items-center gap-2">
           <Link
             href={`/habits?week=${prevWeekParam}`}
-            className="px-2 py-1 rounded-md text-sm hover:bg-black/5"
+            className="px-2 py-1 rounded-md text-sm hover:bg-ink/5"
           >
             ← Prev
           </Link>
@@ -49,14 +49,14 @@ export default function HabitsView({
           </h1>
           <Link
             href={`/habits?week=${nextWeekParam}`}
-            className="px-2 py-1 rounded-md text-sm hover:bg-black/5"
+            className="px-2 py-1 rounded-md text-sm hover:bg-ink/5"
           >
             Next →
           </Link>
         </div>
         <button
           onClick={() => setShowAdd((v) => !v)}
-          className="text-sm px-3 py-1.5 rounded-md bg-black/90 text-white hover:bg-black"
+          className="text-sm px-3 py-1.5 rounded-md bg-ink/90 text-white hover:bg-ink"
         >
           {showAdd ? "Close" : "+ Add habit"}
         </button>
@@ -65,7 +65,7 @@ export default function HabitsView({
       {showAdd && <AddHabitForm onDone={() => setShowAdd(false)} />}
 
       {byCategory.length === 0 && (
-        <p className="text-sm text-black/40">
+        <p className="text-sm text-ink/40">
           No habits yet. Add your first one above.
         </p>
       )}
@@ -80,7 +80,7 @@ export default function HabitsView({
 
         return (
           <section key={category} className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-black/70">
+            <h2 className="text-sm font-semibold text-ink/70">
               {CATEGORY_LABELS[category]}
             </h2>
 

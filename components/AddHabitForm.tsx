@@ -19,33 +19,33 @@ export default function AddHabitForm({ onDone }: { onDone: () => void }) {
         setFrequency("DAILY");
         onDone();
       }}
-      className="rounded-lg border border-black/10 bg-white/60 p-3 flex flex-wrap items-end gap-3"
+      className="rounded-lg border border-ink/10 bg-cream/60 p-3 flex flex-wrap items-end gap-3"
     >
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-black/40">Name</label>
+        <label className="text-xs text-ink/40">Name</label>
         <input
           name="name"
           required
           placeholder="e.g. Protein treatment"
-          className="text-sm px-2 py-1.5 rounded border border-black/10 bg-white focus:outline-none"
+          className="text-sm px-2 py-1.5 rounded border border-ink/10 bg-cream focus:outline-none"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-black/40">Icon</label>
+        <label className="text-xs text-ink/40">Icon</label>
         <input
           name="icon"
           placeholder="💧"
           maxLength={2}
-          className="text-sm px-2 py-1.5 rounded border border-black/10 bg-white w-14 focus:outline-none"
+          className="text-sm px-2 py-1.5 rounded border border-ink/10 bg-cream w-14 focus:outline-none"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-black/40">Category</label>
+        <label className="text-xs text-ink/40">Category</label>
         <select
           name="category"
-          className="text-sm px-2 py-1.5 rounded border border-black/10 bg-white focus:outline-none"
+          className="text-sm px-2 py-1.5 rounded border border-ink/10 bg-cream focus:outline-none"
         >
           {CATEGORY_ORDER.map((c) => (
             <option key={c} value={c}>
@@ -56,12 +56,12 @@ export default function AddHabitForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-black/40">Frequency</label>
+        <label className="text-xs text-ink/40">Frequency</label>
         <select
           name="frequency"
           value={frequency}
           onChange={(e) => setFrequency(e.target.value as typeof frequency)}
-          className="text-sm px-2 py-1.5 rounded border border-black/10 bg-white focus:outline-none"
+          className="text-sm px-2 py-1.5 rounded border border-ink/10 bg-cream focus:outline-none"
         >
           <option value="DAILY">Daily</option>
           <option value="WEEKLY_TARGET">X times per week</option>
@@ -71,34 +71,34 @@ export default function AddHabitForm({ onDone }: { onDone: () => void }) {
 
       {frequency === "WEEKLY_TARGET" && (
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-black/40">Times / week</label>
+          <label className="text-xs text-ink/40">Times / week</label>
           <input
             type="number"
             name="weeklyTarget"
             min={1}
             max={7}
             defaultValue={5}
-            className="text-sm px-2 py-1.5 rounded border border-black/10 bg-white w-16 focus:outline-none"
+            className="text-sm px-2 py-1.5 rounded border border-ink/10 bg-cream w-16 focus:outline-none"
           />
         </div>
       )}
 
       {frequency === "INTERVAL" && (
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-black/40">Every (days)</label>
+          <label className="text-xs text-ink/40">Every (days)</label>
           <input
             type="number"
             name="intervalDays"
             min={1}
             defaultValue={49}
-            className="text-sm px-2 py-1.5 rounded border border-black/10 bg-white w-20 focus:outline-none"
+            className="text-sm px-2 py-1.5 rounded border border-ink/10 bg-cream w-20 focus:outline-none"
           />
         </div>
       )}
 
       <button
         type="submit"
-        className="text-sm px-3 py-1.5 rounded-md bg-black/90 text-white hover:bg-black"
+        className="text-sm px-3 py-1.5 rounded-md bg-ink/90 text-white hover:bg-ink"
       >
         Add
       </button>

@@ -27,6 +27,19 @@ enum TaskStatus {
   DONE
 }
 
+enum FailureMode {
+  INERTIA
+  MIND_BODY_GAP
+  TECHNICAL_WALL
+  PLANNING_FATIGUE
+}
+
+enum ReadingStatus {
+  READING
+  PAUSED
+  COMPLETED
+}
+
 model Task {
   id          String     @id @default(cuid())
   title       String
@@ -34,7 +47,6 @@ model Task {
   status      TaskStatus @default(TODO)
   priority    Int        @default(2) // 1 = high, 2 = medium, 3 = low
   weekOf      DateTime // Monday of the week this task belongs to
-  dayOfWeek   Int? // 0 (Mon) - 6 (Sun); null = unscheduled within the week
   position    Int        @default(0)
   completedAt DateTime?
   createdAt   DateTime   @default(now())
@@ -70,9 +82,51 @@ model HabitLog {
 }
 
 model WeeklyReflection {
-  id         String   @id @default(cuid())
-  weekOf     DateTime @unique // Monday of the week
-  focus      String? // weekly goal / intention
-  reflection String? // end-of-week reflection
-  updatedAt  DateTime @updatedAt
+  id          String       @id @default(cuid())
+  weekOf      DateTime     @unique // Monday of the week
+  focus       String? // weekly goal / intention
+  hoursSpent  Float? // hours spent on career goals this week
+  shipped     String? // what shipped this week
+  notShipped  String? // what didn't ship this week
+  didShip     Boolean      @default(false) // did *something* ship, regardless of how much work got done
+  failureMode FailureMode? // only meaningful when didShip = false
+  updatedAt   DateTime     @updatedAt
+}
+
+model WeeklyGoal {
+  id        String   @id @default(cuid())
+  weekOf    DateTime // Monday of the week this goal belongs to
+  title     String
+  done      Boolean  @default(false)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([weekOf])
+}
+
+model GymSession {
+  id        String   @id @default(cuid())
+  date      DateTime @unique // day of the gym session (normalized to midnight UTC)
+  createdAt DateTime @default(now())
+}
+
+model GymSettings {
+  id           String @id @default("singleton")
+  weeklyTarget Int    @default(5)
+}
+
+model DailyCheckIn {
+  id        String   @id @default(cuid())
+  date      DateTime @unique // the evening this check-in was written, planning the next day
+  note      String?
+  updatedAt DateTime @updatedAt
+}
+
+model CurrentlyReading {
+  id        String        @id @default("singleton")
+  title     String?
+  author    String?
+  coverUrl  String?
+  status    ReadingStatus @default(READING)
+  updatedAt DateTime      @updatedAt
 }

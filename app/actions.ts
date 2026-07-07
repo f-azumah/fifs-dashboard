@@ -3,7 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { dateOnly, mondayOf } from "@/lib/dates";
-import type { HabitCategory, HabitFrequency } from "@prisma/client";
+import { searchBooks } from "@/lib/openLibrary";
+import type {
+  FailureMode,
+  HabitCategory,
+  HabitFrequency,
+  ReadingStatus,
+} from "@prisma/client";
 
 const DASHBOARD_PATH = "/";
 const HABITS_PATH = "/habits";
@@ -15,17 +21,12 @@ export async function createTask(formData: FormData) {
   if (!title) return;
 
   const weekOfRaw = String(formData.get("weekOf"));
-  const dayOfWeekRaw = formData.get("dayOfWeek");
   const priorityRaw = formData.get("priority");
 
   await prisma.task.create({
     data: {
       title,
       weekOf: mondayOf(new Date(weekOfRaw)),
-      dayOfWeek:
-        dayOfWeekRaw !== null && dayOfWeekRaw !== ""
-          ? Number(dayOfWeekRaw)
-          : null,
       priority: priorityRaw ? Number(priorityRaw) : 2,
     },
   });
@@ -54,19 +55,156 @@ export async function deleteTask(taskId: string) {
   revalidatePath(DASHBOARD_PATH);
 }
 
-export async function saveWeeklyReflection(formData: FormData) {
+export async function saveWeeklyFocus(formData: FormData) {
   const weekOfRaw = String(formData.get("weekOf"));
   const focus = String(formData.get("focus") ?? "");
-  const reflection = String(formData.get("reflection") ?? "");
   const weekOf = mondayOf(new Date(weekOfRaw));
 
   await prisma.weeklyReflection.upsert({
     where: { weekOf },
-    create: { weekOf, focus, reflection },
-    update: { focus, reflection },
+    create: { weekOf, focus },
+    update: { focus },
   });
 
   revalidatePath(DASHBOARD_PATH);
+}
+
+export async function saveShipReport(formData: FormData) {
+  const weekOfRaw = String(formData.get("weekOf"));
+  const weekOf = mondayOf(new Date(weekOfRaw));
+  const hoursSpentRaw = formData.get("hoursSpent");
+  const shipped = String(formData.get("shipped") ?? "");
+  const notShipped = String(formData.get("notShipped") ?? "");
+  const didShip = String(formData.get("didShip") ?? "") === "true";
+  const failureModeRaw = String(formData.get("failureMode") ?? "");
+
+  await prisma.weeklyReflection.upsert({
+    where: { weekOf },
+    create: {
+      weekOf,
+      hoursSpent: hoursSpentRaw ? Number(hoursSpentRaw) : null,
+      shipped,
+      notShipped,
+      didShip,
+      failureMode: !didShip && failureModeRaw ? (failureModeRaw as FailureMode) : null,
+    },
+    update: {
+      hoursSpent: hoursSpentRaw ? Number(hoursSpentRaw) : null,
+      shipped,
+      notShipped,
+      didShip,
+      failureMode: !didShip && failureModeRaw ? (failureModeRaw as FailureMode) : null,
+    },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+// ---------- Weekly goals ----------
+
+export async function createWeeklyGoal(formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return;
+
+  const weekOfRaw = String(formData.get("weekOf"));
+
+  await prisma.weeklyGoal.create({
+    data: { title, weekOf: mondayOf(new Date(weekOfRaw)) },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function toggleWeeklyGoal(goalId: string) {
+  const goal = await prisma.weeklyGoal.findUnique({ where: { id: goalId } });
+  if (!goal) return;
+
+  await prisma.weeklyGoal.update({
+    where: { id: goalId },
+    data: { done: !goal.done },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function deleteWeeklyGoal(goalId: string) {
+  await prisma.weeklyGoal.delete({ where: { id: goalId } });
+  revalidatePath(DASHBOARD_PATH);
+}
+
+// ---------- Gym tracker ----------
+
+export async function toggleGymSession(isoDate: string) {
+  const date = dateOnly(new Date(`${isoDate}T00:00:00.000Z`));
+
+  const existing = await prisma.gymSession.findUnique({ where: { date } });
+
+  if (existing) {
+    await prisma.gymSession.delete({ where: { id: existing.id } });
+  } else {
+    await prisma.gymSession.create({ data: { date } });
+  }
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function saveGymGoal(formData: FormData) {
+  const weeklyTarget = Number(formData.get("weeklyTarget"));
+  if (!weeklyTarget || weeklyTarget < 1) return;
+
+  await prisma.gymSettings.upsert({
+    where: { id: "singleton" },
+    create: { id: "singleton", weeklyTarget },
+    update: { weeklyTarget },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+// ---------- Daily check-in ----------
+
+export async function saveDailyCheckIn(formData: FormData) {
+  const isoDate = String(formData.get("date"));
+  const note = String(formData.get("note") ?? "");
+  const date = dateOnly(new Date(`${isoDate}T00:00:00.000Z`));
+
+  await prisma.dailyCheckIn.upsert({
+    where: { date },
+    create: { date, note },
+    update: { note },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+// ---------- Currently reading ----------
+
+export async function setCurrentlyReadingBook(book: {
+  title: string;
+  author: string;
+  coverUrl: string | null;
+}) {
+  await prisma.currentlyReading.upsert({
+    where: { id: "singleton" },
+    create: { id: "singleton", ...book, status: "READING" },
+    update: { ...book, status: "READING" },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function setReadingStatus(status: ReadingStatus) {
+  await prisma.currentlyReading.upsert({
+    where: { id: "singleton" },
+    create: { id: "singleton", status },
+    update: { status },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function searchBooksAction(query: string) {
+  return searchBooks(query);
 }
 
 // ---------- Habits ----------

@@ -44,6 +44,22 @@ export function shiftWeek(weekOf: Date, delta: number): Date {
   return new Date(weekOf.getTime() + delta * 7 * DAY_MS);
 }
 
+export function parseDayParam(dayParam: string | undefined): Date {
+  if (dayParam) {
+    const parsed = new Date(`${dayParam}T00:00:00.000Z`);
+    if (!Number.isNaN(parsed.getTime())) return dateOnly(parsed);
+  }
+  return todayUTCDateOnly();
+}
+
+export function shiftDay(day: Date, delta: number): Date {
+  return new Date(day.getTime() + delta * DAY_MS);
+}
+
+export function formatFullDate(date: Date): string {
+  return `${formatMonthDay(date)}, ${date.getUTCFullYear()}`;
+}
+
 export function dayDate(weekOf: Date, dayOfWeek: number): Date {
   return new Date(weekOf.getTime() + dayOfWeek * DAY_MS);
 }
