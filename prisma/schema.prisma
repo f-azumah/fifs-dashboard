@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum HabitCategory {
+  HEALTH_FITNESS
+  MIND_SPIRITUAL
+  WORK
+  PERSONAL
+  HAIR_CARE
+}
+
+enum HabitFrequency {
+  DAILY
+  WEEKLY_TARGET
+  INTERVAL
+}
+
+enum TaskStatus {
+  TODO
+  DONE
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Int        @default(2) // 1 = high, 2 = medium, 3 = low
+  weekOf      DateTime // Monday of the week this task belongs to
+  dayOfWeek   Int? // 0 (Mon) - 6 (Sun); null = unscheduled within the week
+  position    Int        @default(0)
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([weekOf])
+}
+
+model Habit {
+  id           String         @id @default(cuid())
+  name         String
+  category     HabitCategory
+  frequency    HabitFrequency
+  weeklyTarget Int? // used when frequency = WEEKLY_TARGET (e.g. 5 out of 7 days)
+  intervalDays Int? // used when frequency = INTERVAL (e.g. 49 days = every 7 weeks)
+  icon         String?
+  color        String?
+  active       Boolean        @default(true)
+  position     Int            @default(0)
+  createdAt    DateTime       @default(now())
+  logs         HabitLog[]
+}
+
+model HabitLog {
+  id          String   @id @default(cuid())
+  habitId     String
+  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date        DateTime // day the habit was completed (normalized to midnight UTC)
+  completedAt DateTime @default(now())
+
+  @@unique([habitId, date])
+  @@index([habitId])
+}
+
+model WeeklyReflection {
+  id         String   @id @default(cuid())
+  weekOf     DateTime @unique // Monday of the week
+  focus      String? // weekly goal / intention
+  reflection String? // end-of-week reflection
+  updatedAt  DateTime @updatedAt
+}
