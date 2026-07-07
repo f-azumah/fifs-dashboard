@@ -9,9 +9,11 @@ import { celebrateCompletion } from "@/lib/celebrate";
 export default function IntervalHabitCard({
   habit,
   lastDone,
+  color,
 }: {
   habit: Habit;
   lastDone: Date | null;
+  color: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const intervalDays = habit.intervalDays ?? 30;
@@ -48,8 +50,8 @@ export default function IntervalHabitCard({
 
       <div className="h-1.5 rounded-full bg-ink/10 overflow-hidden">
         <div
-          className={`h-full rounded-full ${overdue ? "bg-red-400" : "bg-lavender"}`}
-          style={{ width: `${Math.round(progress * 100)}%` }}
+          className={`h-full rounded-full ${overdue ? "bg-red-400" : ""}`}
+          style={{ width: `${Math.round(progress * 100)}%`, backgroundColor: overdue ? undefined : color }}
         />
       </div>
 
@@ -69,7 +71,7 @@ export default function IntervalHabitCard({
           celebrateCompletion();
           startTransition(() => logHabitCompletionToday(habit.id));
         }}
-        className="text-xs px-2 py-1.5 rounded-md bg-ink/90 text-white hover:bg-ink self-start"
+        className="text-xs px-2 py-1.5 rounded-md bg-lavender text-white hover:opacity-90 self-start"
       >
         Mark done today
       </button>

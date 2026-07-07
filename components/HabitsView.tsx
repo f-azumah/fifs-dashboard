@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { Habit, HabitLog } from "@prisma/client";
-import { CATEGORY_ORDER, CATEGORY_LABELS } from "@/lib/habitMeta";
+import { CATEGORY_ORDER, CATEGORY_LABELS, CATEGORY_COLORS, habitColorFor } from "@/lib/habitMeta";
+import { dateOnly, formatMonthDay } from "@/lib/dates";
 import HabitGrid from "@/components/HabitGrid";
 import IntervalHabitCard from "@/components/IntervalHabitCard";
 import AddHabitForm from "@/components/AddHabitForm";
@@ -33,6 +34,24 @@ export default function HabitsView({
     category,
     habits: habits.filter((h) => h.category === category),
   })).filter((group) => group.habits.length > 0);
+
+  const scorableHabits = habits.filter(
+    (h) => h.frequency === "DAILY" || h.frequency === "WEEKLY_TARGET"
+  );
+  const totalTarget = scorableHabits.reduce(
+    (sum, h) => sum + (h.frequency === "WEEKLY_TARGET" ? h.weeklyTarget ?? 7 : 7),
+    0
+  );
+  const totalDone = scorableHabits.reduce((sum, h) => {
+    const completedDates = new Set(h.logs.map((log) => dateOnly(log.date).getTime()));
+    return sum + completedDates.size;
+  }, 0);
+  const progress = totalTarget > 0 ? totalDone / totalTarget : 0;
+
+  const habitColors: Record<string, string> = {};
+  habits.forEach((h, i) => {
+    habitColors[h.id] = habitColorFor(h.id, i, h.color);
+  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -70,6 +89,26 @@ export default function HabitsView({
         </p>
       )}
 
+      {byCategory.length > 0 && (
+        <div className="rounded-lg border border-ink/10 bg-cream/60 p-4 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold">Habit Tracker</h2>
+              <p className="text-xs text-ink/40">Week of {formatMonthDay(weekOf)}</p>
+            </div>
+            <span className="text-xs text-ink/40">
+              {totalDone}/{totalTarget} completions this week
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-ink/10 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-lavender transition-all"
+              style={{ width: `${Math.round(progress * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {byCategory.map(({ category, habits: categoryHabits }) => {
         const gridHabits = categoryHabits.filter(
           (h) => h.frequency === "DAILY" || h.frequency === "WEEKLY_TARGET"
@@ -77,15 +116,20 @@ export default function HabitsView({
         const intervalHabits = categoryHabits.filter(
           (h) => h.frequency === "INTERVAL"
         );
+        const categoryDotColor = CATEGORY_COLORS[category];
 
         return (
           <section key={category} className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-ink/70">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-ink/70">
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: categoryDotColor }}
+              />
               {CATEGORY_LABELS[category]}
             </h2>
 
             {gridHabits.length > 0 && (
-              <HabitGrid weekOf={weekOf} habits={gridHabits} />
+              <HabitGrid weekOf={weekOf} habits={gridHabits} colorMap={habitColors} />
             )}
 
             {intervalHabits.length > 0 && (
@@ -95,6 +139,7 @@ export default function HabitsView({
                     key={habit.id}
                     habit={habit}
                     lastDone={latestIntervalLogs[habit.id] ?? null}
+                    color={habitColors[habit.id]}
                   />
                 ))}
               </div>

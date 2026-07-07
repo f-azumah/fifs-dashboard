@@ -11,9 +11,11 @@ type HabitWithLogs = Habit & { logs: HabitLog[] };
 export default function HabitGrid({
   weekOf,
   habits,
+  colorMap,
 }: {
   weekOf: Date;
   habits: HabitWithLogs[];
+  colorMap: Record<string, string>;
 }) {
   const [, startTransition] = useTransition();
   const days = DAY_LABELS.map((label, i) => ({
@@ -48,6 +50,7 @@ export default function HabitGrid({
             const completedCount = completedDates.size;
             const target =
               habit.frequency === "WEEKLY_TARGET" ? habit.weeklyTarget ?? 7 : 7;
+            const color = colorMap[habit.id];
 
             return (
               <tr
@@ -75,17 +78,27 @@ export default function HabitGrid({
                           if (!done) celebrateCompletion();
                           startTransition(() => toggleHabitLog(habit.id, iso));
                         }}
-                        className={`w-5 h-5 rounded-full border transition-colors ${
+                        style={
                           done
-                            ? "bg-lavender border-lavender"
-                            : "border-ink/20 hover:border-ink/40"
+                            ? { backgroundColor: color, borderColor: color }
+                            : undefined
+                        }
+                        className={`w-5 h-5 rounded-md border flex items-center justify-center text-[11px] font-bold leading-none transition-colors ${
+                          done
+                            ? "text-white"
+                            : "border-ink/20 hover:border-ink/40 text-transparent"
                         }`}
                         aria-label={`Toggle ${habit.name} for ${iso}`}
-                      />
+                      >
+                        ✓
+                      </button>
                     </td>
                   );
                 })}
-                <td className="text-center px-2 py-2 text-xs text-ink/40">
+                <td
+                  className="text-center px-2 py-2 text-xs font-medium"
+                  style={{ color }}
+                >
                   {completedCount}/{target}
                 </td>
               </tr>
