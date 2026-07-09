@@ -14,6 +14,7 @@ enum HabitCategory {
   WORK
   PERSONAL
   HAIR_CARE
+  ENGINEERING_GROWTH
 }
 
 enum HabitFrequency {
@@ -45,6 +46,15 @@ enum GoalCategory {
   HEALTH
   BUSINESS
   PERSONAL
+  ENGINEERING_CREDIBILITY
+}
+
+enum OssPrStatus {
+  NOT_STARTED
+  RESEARCHING_ISSUE
+  IN_PROGRESS
+  SUBMITTED
+  MERGED
 }
 
 model Task {
@@ -174,4 +184,13 @@ model BookLog {
   createdAt   DateTime @default(now())
 
   @@index([completedAt])
+}
+
+model DepthLog {
+  id             String      @id @default(cuid())
+  weekOf         DateTime    @unique // Monday of the week
+  wentDeeper     String? // what I went deeper on this week (revisiting/understanding existing code)
+  explainableNow String? // specific thing I could now explain that I couldn't before
+  ossPrStatus    OssPrStatus @default(NOT_STARTED)
+  updatedAt      DateTime    @updatedAt
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type {
   CurrentlyReading as CurrentlyReadingRecord,
+  DepthLog as DepthLogRecord,
   Task,
   WeeklyGoal,
   WeeklyReflection,
@@ -15,6 +16,7 @@ import GymTracker from "@/components/GymTracker";
 import CurrentlyReading from "@/components/CurrentlyReading";
 import ReflectionWidget from "@/components/ReflectionWidget";
 import ShipTracker from "@/components/ShipTracker";
+import DepthLog from "@/components/DepthLog";
 
 type Props = {
   weekOf: Date;
@@ -37,6 +39,7 @@ type Props = {
   reflectionCount: number;
   currentlyReading: CurrentlyReadingRecord | null;
   events: CalendarEvent[];
+  depthLog: DepthLogRecord | null;
 };
 
 export default function WeekView({
@@ -60,6 +63,7 @@ export default function WeekView({
   reflectionCount,
   currentlyReading,
   events,
+  depthLog,
 }: Props) {
   return (
     <div className="flex flex-col gap-6">
@@ -117,6 +121,7 @@ export default function WeekView({
             weeklyTarget={gymWeeklyTarget}
           />
           <ShipTracker key={`ship-${weekParam}`} weekParam={weekParam} reflection={reflection} />
+          <DepthLog key={`depth-${weekParam}`} weekParam={weekParam} depthLog={depthLog} />
           <CurrentlyReading reading={currentlyReading} />
         </div>
       </div>

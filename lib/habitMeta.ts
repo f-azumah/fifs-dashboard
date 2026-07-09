@@ -6,6 +6,7 @@ export const CATEGORY_ORDER: HabitCategory[] = [
   "WORK",
   "PERSONAL",
   "HAIR_CARE",
+  "ENGINEERING_GROWTH",
 ];
 
 export const CATEGORY_LABELS: Record<HabitCategory, string> = {
@@ -14,6 +15,7 @@ export const CATEGORY_LABELS: Record<HabitCategory, string> = {
   WORK: "Work",
   PERSONAL: "Personal",
   HAIR_CARE: "Hair Care",
+  ENGINEERING_GROWTH: "Engineering Growth",
 };
 
 // Small dot next to each category heading — decorative only.
@@ -23,6 +25,7 @@ export const CATEGORY_COLORS: Record<HabitCategory, string> = {
   WORK: "#C2A468",
   PERSONAL: "#ADA0CB",
   HAIR_CARE: "#D89B96",
+  ENGINEERING_GROWTH: "#8FA8C7",
 };
 
 // Rotating palette assigned per-habit (checkboxes, progress bars) so each

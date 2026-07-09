@@ -10,18 +10,26 @@ import {
 import { celebrateCompletion } from "@/lib/celebrate";
 import { HABIT_COLOR_PALETTE } from "@/lib/habitMeta";
 
-const CATEGORY_ORDER: GoalCategory[] = ["FINANCE", "HEALTH", "BUSINESS", "PERSONAL"];
+const CATEGORY_ORDER: GoalCategory[] = [
+  "FINANCE",
+  "HEALTH",
+  "BUSINESS",
+  "PERSONAL",
+  "ENGINEERING_CREDIBILITY",
+];
 const CATEGORY_LABELS: Record<GoalCategory, string> = {
   FINANCE: "Finance",
   HEALTH: "Health",
   BUSINESS: "Business",
   PERSONAL: "Personal",
+  ENGINEERING_CREDIBILITY: "Engineering Credibility",
 };
 const CATEGORY_COLORS: Record<GoalCategory, string> = {
   FINANCE: HABIT_COLOR_PALETTE[0],
   HEALTH: HABIT_COLOR_PALETTE[1],
   BUSINESS: HABIT_COLOR_PALETTE[2],
   PERSONAL: HABIT_COLOR_PALETTE[3],
+  ENGINEERING_CREDIBILITY: HABIT_COLOR_PALETTE[4],
 };
 
 function CategoryGoalCard({

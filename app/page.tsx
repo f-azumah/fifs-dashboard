@@ -31,6 +31,7 @@ export default async function DashboardPage({
     reflectionCount,
     currentlyReading,
     events,
+    depthLog,
   ] = await Promise.all([
     prisma.task.findMany({
       where: { weekOf },
@@ -51,6 +52,7 @@ export default async function DashboardPage({
     }),
     prisma.currentlyReading.findUnique({ where: { id: "singleton" } }),
     getCalendarEventsForRange(weekOf, shiftWeek(weekOf, 1)),
+    prisma.depthLog.findUnique({ where: { weekOf } }),
   ]);
 
   const dayParam = weekParamFor(day);
@@ -78,6 +80,7 @@ export default async function DashboardPage({
       reflectionCount={reflectionCount}
       currentlyReading={currentlyReading}
       events={events}
+      depthLog={depthLog}
     />
   );
 }

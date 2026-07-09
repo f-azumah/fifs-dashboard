@@ -9,6 +9,7 @@ import type {
   GoalCategory,
   HabitCategory,
   HabitFrequency,
+  OssPrStatus,
   ReadingStatus,
 } from "@prisma/client";
 
@@ -97,6 +98,22 @@ export async function saveShipReport(formData: FormData) {
       didShip,
       failureMode: !didShip && failureModeRaw ? (failureModeRaw as FailureMode) : null,
     },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function saveDepthLog(formData: FormData) {
+  const weekOfRaw = String(formData.get("weekOf"));
+  const weekOf = mondayOf(new Date(weekOfRaw));
+  const wentDeeper = String(formData.get("wentDeeper") ?? "");
+  const explainableNow = String(formData.get("explainableNow") ?? "");
+  const ossPrStatus = String(formData.get("ossPrStatus") ?? "NOT_STARTED") as OssPrStatus;
+
+  await prisma.depthLog.upsert({
+    where: { weekOf },
+    create: { weekOf, wentDeeper, explainableNow, ossPrStatus },
+    update: { wentDeeper, explainableNow, ossPrStatus },
   });
 
   revalidatePath(DASHBOARD_PATH);
