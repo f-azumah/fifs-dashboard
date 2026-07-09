@@ -25,7 +25,7 @@ export default async function QuarterPage({
   const earliestWeek = weekStarts[0];
   const upperBound = shiftWeek(thisWeekStart, 1);
 
-  const [goals, wins, ideas, books, gymSessions] = await Promise.all([
+  const [goals, wins, ideas, books, gymSessions, codingHabits] = await Promise.all([
     prisma.quarterlyGoal.findMany({
       where: { quarterOf: qStart },
       orderBy: [{ position: "asc" }, { createdAt: "asc" }],
@@ -42,12 +42,31 @@ export default async function QuarterPage({
     prisma.gymSession.findMany({
       where: { date: { gte: earliestWeek, lt: upperBound } },
     }),
+    prisma.habit.findMany({
+      where: {
+        name: { in: ["NeetCode 150 — problem opened", "DS&A practice (TypeScript)"] },
+      },
+      include: {
+        logs: { where: { date: { gte: earliestWeek, lt: upperBound } } },
+      },
+    }),
   ]);
 
   const gymWeeks = weekStarts.map((ws) => {
     const we = shiftWeek(ws, 1);
     const count = gymSessions.filter((s) => s.date >= ws && s.date < we).length;
     return { label: weekParamFor(ws), count };
+  });
+
+  const codingLogs = codingHabits.flatMap((h) => h.logs);
+  const codingWeeks = weekStarts.map((ws) => {
+    const we = shiftWeek(ws, 1);
+    const daysWithActivity = new Set(
+      codingLogs
+        .filter((l) => l.date >= ws && l.date < we)
+        .map((l) => l.date.getTime())
+    );
+    return { label: weekParamFor(ws), count: daysWithActivity.size };
   });
 
   return (
@@ -61,6 +80,7 @@ export default async function QuarterPage({
       ideas={ideas}
       books={books}
       gymWeeks={gymWeeks}
+      codingWeeks={codingWeeks}
     />
   );
 }

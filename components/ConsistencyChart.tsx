@@ -1,14 +1,16 @@
-export default function GymConsistencyChart({
+export default function ConsistencyChart({
   weeks,
+  title,
 }: {
   weeks: { label: string; count: number }[];
+  title: string;
 }) {
   const max = Math.max(...weeks.map((w) => w.count), 1);
 
   return (
     <div className="rounded-lg border border-ink/10 bg-cream/60 p-4 flex flex-col gap-2">
       <h2 className="text-xs font-semibold uppercase tracking-wide text-ink/40">
-        🏋️ Gym consistency
+        {title}
       </h2>
       <p className="text-xs text-ink/30">Last {weeks.length} weeks</p>
       <div className="flex items-end gap-1 h-24 mt-1">

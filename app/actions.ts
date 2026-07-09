@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { dateOnly, mondayOf, quarterStart } from "@/lib/dates";
 import { searchBooks } from "@/lib/openLibrary";
 import type {
+  DsaConfidence,
   FailureMode,
   GoalCategory,
   HabitCategory,
@@ -116,6 +117,31 @@ export async function saveDepthLog(formData: FormData) {
     update: { wentDeeper, explainableNow, ossPrStatus },
   });
 
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function createDsaLogEntry(formData: FormData) {
+  const patternFocus = String(formData.get("patternFocus") ?? "").trim();
+  if (!patternFocus) return;
+
+  const problemsSolvedRaw = formData.get("problemsSolved");
+  const stuckOn = String(formData.get("stuckOn") ?? "").trim();
+  const confidenceRaw = String(formData.get("confidence") ?? "");
+
+  await prisma.dsaLogEntry.create({
+    data: {
+      patternFocus,
+      problemsSolved: problemsSolvedRaw ? Number(problemsSolvedRaw) : null,
+      stuckOn: stuckOn || null,
+      confidence: confidenceRaw ? (confidenceRaw as DsaConfidence) : null,
+    },
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+}
+
+export async function deleteDsaLogEntry(entryId: string) {
+  await prisma.dsaLogEntry.delete({ where: { id: entryId } });
   revalidatePath(DASHBOARD_PATH);
 }
 

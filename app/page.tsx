@@ -32,6 +32,8 @@ export default async function DashboardPage({
     currentlyReading,
     events,
     depthLog,
+    neetCodeHabit,
+    dsaLogEntries,
   ] = await Promise.all([
     prisma.task.findMany({
       where: { weekOf },
@@ -53,6 +55,11 @@ export default async function DashboardPage({
     prisma.currentlyReading.findUnique({ where: { id: "singleton" } }),
     getCalendarEventsForRange(weekOf, shiftWeek(weekOf, 1)),
     prisma.depthLog.findUnique({ where: { weekOf } }),
+    prisma.habit.findFirst({
+      where: { name: "NeetCode 150 — problem opened" },
+      include: { logs: { where: { date: { gte: weekOf, lte: weekEnd } } } },
+    }),
+    prisma.dsaLogEntry.findMany({ orderBy: { createdAt: "desc" } }),
   ]);
 
   const dayParam = weekParamFor(day);
@@ -81,6 +88,8 @@ export default async function DashboardPage({
       currentlyReading={currentlyReading}
       events={events}
       depthLog={depthLog}
+      neetCodeHabit={neetCodeHabit}
+      dsaLogEntries={dsaLogEntries}
     />
   );
 }

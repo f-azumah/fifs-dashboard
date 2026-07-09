@@ -194,3 +194,20 @@ model DepthLog {
   ossPrStatus    OssPrStatus @default(NOT_STARTED)
   updatedAt      DateTime    @updatedAt
 }
+
+enum DsaConfidence {
+  SHAKY
+  GETTING_THERE
+  SOLID
+}
+
+model DsaLogEntry {
+  id             String         @id @default(cuid())
+  patternFocus   String // e.g. "sliding window", "graph BFS"
+  problemsSolved Int?
+  stuckOn        String? // where I got stuck
+  confidence     DsaConfidence?
+  createdAt      DateTime       @default(now()) // not week-scoped — entries accumulate indefinitely
+
+  @@index([createdAt])
+}

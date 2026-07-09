@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { BookLog, Idea, QuarterlyGoal, QuarterlyWin } from "@prisma/client";
-import GymConsistencyChart from "@/components/GymConsistencyChart";
+import ConsistencyChart from "@/components/ConsistencyChart";
 import QuarterlyGoals from "@/components/QuarterlyGoals";
 import QuarterlyWins from "@/components/QuarterlyWins";
 import IdeaParkingLot from "@/components/IdeaParkingLot";
@@ -18,6 +18,7 @@ export default function QuarterView({
   ideas,
   books,
   gymWeeks,
+  codingWeeks,
 }: {
   quarterParam: string;
   quarterLabel: string;
@@ -28,6 +29,7 @@ export default function QuarterView({
   ideas: Idea[];
   books: BookLog[];
   gymWeeks: { label: string; count: number }[];
+  codingWeeks: { label: string; count: number }[];
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -53,7 +55,8 @@ export default function QuarterView({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="flex flex-col gap-4">
-          <GymConsistencyChart weeks={gymWeeks} />
+          <ConsistencyChart weeks={gymWeeks} title="🏋️ Gym consistency" />
+          <ConsistencyChart weeks={codingWeeks} title="💻 Coding consistency" />
           <QuarterlyGoals quarterParam={quarterParam} goals={goals} />
         </div>
         <div className="flex flex-col gap-4">
