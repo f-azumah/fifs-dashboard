@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type {
   CurrentlyReading as CurrentlyReadingRecord,
   DepthLog as DepthLogRecord,
@@ -12,6 +14,7 @@ import type {
   WeeklyReflection,
 } from "@prisma/client";
 import type { CalendarEvent } from "@/lib/calendar";
+import { localDateParamNow, localMondayParamNow } from "@/lib/dates";
 import FocusGoalsCard from "@/components/FocusGoalsCard";
 import TaskList from "@/components/TaskList";
 import EventsThisWeek from "@/components/EventsThisWeek";
@@ -46,6 +49,8 @@ type Props = {
   depthLog: DepthLogRecord | null;
   neetCodeHabit: (Habit & { logs: HabitLog[] }) | null;
   dsaLogEntries: DsaLogEntry[];
+  hasExplicitWeek: boolean;
+  hasExplicitDay: boolean;
 };
 
 export default function WeekView({
@@ -72,7 +77,29 @@ export default function WeekView({
   depthLog,
   neetCodeHabit,
   dsaLogEntries,
+  hasExplicitWeek,
+  hasExplicitDay,
 }: Props) {
+  const router = useRouter();
+
+  // The server resolves missing week/day params using UTC "today", which can
+  // be a full calendar day ahead of the viewer for part of the evening in any
+  // timezone behind UTC. Once mounted, correct that against the browser's
+  // actual local clock.
+  useEffect(() => {
+    if (hasExplicitWeek && hasExplicitDay) return;
+    const nextWeek = hasExplicitWeek ? weekParam : localMondayParamNow();
+    const nextDay = hasExplicitDay ? dayParam : localDateParamNow();
+    if (nextWeek !== weekParam || nextDay !== dayParam) {
+      router.replace(`/?week=${nextWeek}&day=${nextDay}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function goToToday() {
+    router.push(`/?week=${localMondayParamNow()}&day=${localDateParamNow()}`);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -93,7 +120,14 @@ export default function WeekView({
             Next →
           </Link>
         </div>
-        <Link href="/" className="text-sm text-ink/50 hover:text-ink/80">
+        <Link
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            goToToday();
+          }}
+          className="text-sm text-ink/50 hover:text-ink/80"
+        >
           Today
         </Link>
       </div>

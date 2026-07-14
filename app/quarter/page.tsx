@@ -81,6 +81,7 @@ export default async function QuarterPage({
       books={books}
       gymWeeks={gymWeeks}
       codingWeeks={codingWeeks}
+      hasExplicitQuarter={typeof searchParams.quarter === "string"}
     />
   );
 }

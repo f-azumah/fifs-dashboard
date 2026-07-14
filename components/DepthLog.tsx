@@ -49,7 +49,7 @@ export default function DepthLog({
 
       <div>
         <label className="text-xs text-ink/40">
-          Specific thing I could now explain that I couldn&apos;t before
+          Specific thing I could now explain that I couldn't before
         </label>
         <textarea
           value={explainableNow}

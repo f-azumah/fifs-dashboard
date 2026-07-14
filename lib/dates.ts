@@ -116,3 +116,33 @@ export function quarterLabel(qStart: Date): string {
   const q = Math.floor(qStart.getUTCMonth() / 3) + 1;
   return `Q${q} ${qStart.getUTCFullYear()}`;
 }
+
+// ---- Browser-local-time helpers ----
+// The server (Vercel) always runs in UTC, so "today"/"this week" computed
+// server-side can be a full calendar day ahead of the viewer's actual local
+// day for part of the evening in any timezone behind UTC. These use the
+// browser's LOCAL Date getters on purpose and must only be called client-side
+// (e.g. to redirect a bare "/" URL to an explicit ?day=/&week= once mounted).
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+export function localDateParamNow(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+export function localMondayParamNow(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sun ... 6 = Sat, local
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+  return `${monday.getFullYear()}-${pad2(monday.getMonth() + 1)}-${pad2(monday.getDate())}`;
+}
+
+export function localQuarterParamNow(): string {
+  const now = new Date();
+  const q = Math.floor(now.getMonth() / 3);
+  return `${now.getFullYear()}-${pad2(q * 3 + 1)}-01`;
+}

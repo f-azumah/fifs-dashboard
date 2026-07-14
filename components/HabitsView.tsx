@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Habit, HabitLog } from "@prisma/client";
 import { CATEGORY_ORDER, CATEGORY_LABELS, CATEGORY_COLORS, habitColorFor } from "@/lib/habitMeta";
-import { dateOnly, formatMonthDay } from "@/lib/dates";
+import { dateOnly, formatMonthDay, localMondayParamNow } from "@/lib/dates";
 import HabitGrid from "@/components/HabitGrid";
 import IntervalHabitCard from "@/components/IntervalHabitCard";
 import AddHabitForm from "@/components/AddHabitForm";
@@ -19,6 +20,7 @@ export default function HabitsView({
   nextWeekParam,
   habits,
   latestIntervalLogs,
+  hasExplicitWeek,
 }: {
   weekOf: Date;
   weekParam: string;
@@ -27,8 +29,19 @@ export default function HabitsView({
   nextWeekParam: string;
   habits: HabitWithLogs[];
   latestIntervalLogs: Record<string, Date>;
+  hasExplicitWeek: boolean;
 }) {
   const [showAdd, setShowAdd] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (hasExplicitWeek) return;
+    const localWeek = localMondayParamNow();
+    if (localWeek !== weekParam) {
+      router.replace(`/habits?week=${localWeek}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const byCategory = CATEGORY_ORDER.map((category) => ({
     category,

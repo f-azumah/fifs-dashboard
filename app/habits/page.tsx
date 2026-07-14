@@ -51,6 +51,7 @@ export default async function HabitsPage({
       nextWeekParam={weekParamFor(shiftWeek(weekOf, 1))}
       habits={habits}
       latestIntervalLogs={latestByHabit}
+      hasExplicitWeek={typeof searchParams.week === "string"}
     />
   );
 }

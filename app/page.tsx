@@ -90,6 +90,8 @@ export default async function DashboardPage({
       depthLog={depthLog}
       neetCodeHabit={neetCodeHabit}
       dsaLogEntries={dsaLogEntries}
+      hasExplicitWeek={typeof searchParams.week === "string"}
+      hasExplicitDay={typeof searchParams.day === "string"}
     />
   );
 }

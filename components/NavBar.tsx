@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ButterflyIcon from "@/components/ButterflyIcon";
@@ -10,8 +11,27 @@ const links = [
   { href: "/quarter", label: "Quarter" },
 ];
 
+function formatToday(): string {
+  return new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export default function NavBar() {
   const pathname = usePathname();
+  // Computed client-side only (not during SSR) so it always reflects the
+  // viewer's actual local clock, and refreshed periodically so it doesn't
+  // go stale if the tab is left open across midnight.
+  const [today, setToday] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToday(formatToday());
+    const interval = setInterval(() => setToday(formatToday()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="border-b border-ink/10">
@@ -21,14 +41,7 @@ export default function NavBar() {
             Hey Fiona
             <ButterflyIcon className="w-5 h-5 text-lavender" />
           </span>
-          <span className="text-xs text-ink/40" suppressHydrationWarning>
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </span>
+          <span className="text-xs text-ink/40 min-h-[1em]">{today}</span>
         </div>
         <nav className="flex gap-1">
           {links.map((link) => {

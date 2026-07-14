@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { BookLog, Idea, QuarterlyGoal, QuarterlyWin } from "@prisma/client";
+import { localQuarterParamNow } from "@/lib/dates";
 import ConsistencyChart from "@/components/ConsistencyChart";
 import QuarterlyGoals from "@/components/QuarterlyGoals";
 import QuarterlyWins from "@/components/QuarterlyWins";
@@ -19,6 +22,7 @@ export default function QuarterView({
   books,
   gymWeeks,
   codingWeeks,
+  hasExplicitQuarter,
 }: {
   quarterParam: string;
   quarterLabel: string;
@@ -30,7 +34,18 @@ export default function QuarterView({
   books: BookLog[];
   gymWeeks: { label: string; count: number }[];
   codingWeeks: { label: string; count: number }[];
+  hasExplicitQuarter: boolean;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (hasExplicitQuarter) return;
+    const localQuarter = localQuarterParamNow();
+    if (localQuarter !== quarterParam) {
+      router.replace(`/quarter?quarter=${localQuarter}`);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
